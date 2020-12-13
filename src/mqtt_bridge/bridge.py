@@ -58,11 +58,12 @@ class RosToMqttBridge(Bridge):
     :param (float|None) frequency: publish frequency
     """
 
-    def __init__(self, topic_from, topic_to, msg_type, frequency=None):
+    def __init__(self, topic_from, topic_to, msg_type, frequency=None, use_bytes=False):
         self._topic_from = topic_from
         self._topic_to = self._extract_private_path(topic_to)
         self._last_published = rospy.get_time()
         self._interval = 0 if frequency is None else 1.0 / frequency
+        self._use_bytes = use_bytes
         rospy.Subscriber(topic_from, msg_type, self._callback_ros)
 
     def _callback_ros(self, msg):
@@ -73,9 +74,10 @@ class RosToMqttBridge(Bridge):
             self._last_published = now
 
     def _publish(self, msg):
-        payload = bytearray(self._serialize(extract_values(msg)))
+        payload = self._serialize(extract_values(msg))
+        if self._use_bytes:
+            payload = bytearray(payload)        
         self._mqtt_client.publish(topic=self._topic_to, payload=payload)
-
 
 class MqttToRosBridge(Bridge):
     u""" Bridge from MQTT to ROS topic
