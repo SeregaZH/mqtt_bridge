@@ -44,6 +44,7 @@ def mqtt_bridge_node():
     # load serializer and deserializer
     serializer = params.get('serializer', 'json:dumps')
     deserializer = params.get('deserializer', 'json:loads')
+    use_bytes = params.get('use_bytes', False)
 
     # dependency injection
     config = create_config(
@@ -58,6 +59,8 @@ def mqtt_bridge_node():
     # configure bridges
     bridges = []
     for bridge_args in bridge_params:
+        if 'use_bytes' not in bridge_args:
+            bridge_args['use_bytes'] = use_bytes
         bridges.append(create_bridge(**bridge_args))
 
     # start MQTT loop
