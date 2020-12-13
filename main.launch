@@ -1,7 +1,0 @@
-<launch>
-  <arg name="bridge_config" default="$(find mqtt_bridge)/config/demo_params.yaml" />
-  <node name="mqtt_bridge" pkg="mqtt_bridge" type="mqtt_bridge_node.py" output="screen">
-    <rosparam command="delete" param="" />
-    <rosparam command="load" file="$(arg bridge_config)" />
-  </node>
-</launch>
