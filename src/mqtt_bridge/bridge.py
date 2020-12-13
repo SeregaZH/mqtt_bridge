@@ -59,7 +59,6 @@ class RosToMqttBridge(Bridge):
     """
 
     def __init__(self, topic_from, topic_to, msg_type, frequency=None, **kwargs):
-        super(RosToMqttBridge, self).__init__()
         self._topic_from = topic_from
         self._topic_to = self._extract_private_path(topic_to)
         self._last_published = rospy.get_time()
