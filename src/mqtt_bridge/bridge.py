@@ -8,7 +8,7 @@ import paho.mqtt.client as mqtt
 import rospy
 
 from .util import lookup_object, extract_values, populate_instance
-
+from .enricher import create_enricher
 
 def create_bridge(factory, msg_type, topic_from, topic_to, **kwargs):
     u""" bridge generator function
@@ -64,7 +64,8 @@ class RosToMqttBridge(Bridge):
         self._last_published = rospy.get_time()
         self._interval = 0 if frequency is None else 1.0 / frequency
         self._use_bytes = kwargs.get('use_bytes', False)
-        rospy.Subscriber(topic_from, msg_type, self._callback_ros)
+        self.enricher = create_enricher((topic_from, msg_type), self._callback_ros, kwargs.get('enrichers'))
+        #rospy.Subscriber(topic_from, msg_type, self._callback_ros)
 
     def _callback_ros(self, msg):
         rospy.logdebug("ROS received from {}".format(self._topic_from))
