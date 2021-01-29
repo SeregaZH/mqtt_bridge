@@ -23,7 +23,6 @@ class Enricher(object):
             else:
                 prop_config = self.__props_config[message._type]
                 Enricher.__set_props(prop_config, result_bag, message)
-        print(result_bag)
         self.__callback(result_bag)
 
     @staticmethod
