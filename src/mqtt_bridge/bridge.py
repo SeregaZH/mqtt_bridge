@@ -26,7 +26,6 @@ def create_bridge(factory, msg_type, topic_from, topic_to, **kwargs):
     if not issubclass(factory, Bridge):
         raise ValueError("factory should be Bridge subclass")
     msg_type = instantiate_message(msg_type)
-    time.sleep(10)
     return factory(
         topic_from=topic_from, topic_to=topic_to, msg_type=msg_type, **kwargs)
 
