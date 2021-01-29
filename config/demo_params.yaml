@@ -15,11 +15,6 @@ bridge:
     msg_type: std_msgs.msg:Bool
     topic_from: /ping
     topic_to: ping
-    enricher:
-      - source_topic: /echo
-        msg_type: std_msgs.msg:String
-        source_property: test
-        target_property: test
   - factory: mqtt_bridge.bridge:MqttToRosBridge
     msg_type: std_msgs.msg:Bool
     topic_from: ping
