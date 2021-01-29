@@ -6,9 +6,10 @@ from abc import ABCMeta, abstractmethod
 import inject
 import paho.mqtt.client as mqtt
 import rospy
+import time
 
-from .util import lookup_object, extract_values, populate_instance
-
+from .util import lookup_object, extract_values, populate_instance, instantiate_message
+from .enricher import create_enricher
 
 def create_bridge(factory, msg_type, topic_from, topic_to, **kwargs):
     u""" bridge generator function
@@ -24,12 +25,8 @@ def create_bridge(factory, msg_type, topic_from, topic_to, **kwargs):
         factory = lookup_object(factory)
     if not issubclass(factory, Bridge):
         raise ValueError("factory should be Bridge subclass")
-    if isinstance(msg_type, basestring):
-        msg_type = lookup_object(msg_type)
-    if not issubclass(msg_type, rospy.Message):
-        raise TypeError(
-            "msg_type should be rospy.Message instance or its string"
-            "reprensentation")
+    msg_type = instantiate_message(msg_type)
+    time.sleep(10)
     return factory(
         topic_from=topic_from, topic_to=topic_to, msg_type=msg_type, **kwargs)
 
@@ -64,7 +61,7 @@ class RosToMqttBridge(Bridge):
         self._last_published = rospy.get_time()
         self._interval = 0 if frequency is None else 1.0 / frequency
         self._use_bytes = kwargs.get('use_bytes', False)
-        rospy.Subscriber(topic_from, msg_type, self._callback_ros)
+        self._enricher = create_enricher((topic_from, msg_type), self._callback_ros, kwargs.get('enricher', []))
 
     def _callback_ros(self, msg):
         rospy.logdebug("ROS received from {}".format(self._topic_from))
@@ -74,9 +71,9 @@ class RosToMqttBridge(Bridge):
             self._last_published = now
 
     def _publish(self, msg):
-        payload = self._serialize(extract_values(msg))
+        payload = self._serialize(msg if self._enricher else extract_values(msg))
         if self._use_bytes:
-            payload = bytearray(payload)        
+            payload = bytearray(payload)
         self._mqtt_client.publish(topic=self._topic_to, payload=payload)
 
 class MqttToRosBridge(Bridge):
