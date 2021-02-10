@@ -16,3 +16,4 @@ rosmsg
 rospy<1.15  # 1.15 is for python3
 sensor-msgs
 std-msgs
+pytest-mock

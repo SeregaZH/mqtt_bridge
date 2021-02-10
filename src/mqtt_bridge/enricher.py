@@ -10,10 +10,10 @@ class Enricher(object):
         self.__props_config = Enricher.__process_config(enrich_config)
         subscribers = list([ Subscriber(t.get('topic'), t.get('msg_inst')) for t in self.__props_config.values() ])
         subscribers.append(Subscriber(source_topic, source_msg))
-        self.synchronizer = ApproximateTimeSynchronizer(subscribers, 2, 1, True)
+        self.__synchronizer = ApproximateTimeSynchronizer(subscribers, 2, 1, True)
         self.__source_msg = source_msg._type
         self.__callback = callback
-        self.synchronizer.registerCallback(self.__enricherCallback)
+        self.__synchronizer.registerCallback(self.__enricherCallback)
 
     def __enricherCallback(self, *args):
         result_bag = dict()
@@ -48,6 +48,10 @@ class Enricher(object):
             bag[t] = getattr(msg, s)
 
 def create_enricher(source_topic, callback, enricher_config=None):
+    if source_topic is None:
+        raise ValueError('Source topic tuple should be specified')
+    if callback is None:
+        raise ValueError('Callback should be specified')
     return Enricher(source_topic, callback, enricher_config) if enricher_config else None
 
 __all__ = ['create_enricher', 'Enricher']

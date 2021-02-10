@@ -1,8 +1,6 @@
 import threading
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
-
 import pytest
-
 
 class ParameterServerMock(BaseHTTPRequestHandler):
     """ mock server for unittest
@@ -32,3 +30,13 @@ def run_mock_parameter_server(request):
     thread = threading.Thread(target=httpd.serve_forever)
     thread.daemon = True
     thread.start()
+
+@pytest.fixture(scope="function")
+def stub_enricher_config():
+      return [
+        {
+          'topic': '/test/topic',
+          'msg_type': 'sensor_msgs.msg:NavSatFix',
+          'source_props': ['latitude', 'longitude'],
+          'target_props': ['latitude', 'longitude']
+        }]
