@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
 from importlib import import_module
-import rospy
+from typing import Any, Callable, Dict
 
+import rospy
 from rosbridge_library.internal import message_conversion
 
-def lookup_object(object_path, package='mqtt_bridge'):
+def lookup_object(object_path: str, package: str='mqtt_bridge') -> Any:
     """ lookup object from a some.module:object_name specification. """
     module_name, obj_name = object_path.split(":")
     module = import_module(module_name, package)
@@ -30,14 +29,16 @@ def monkey_patch_message_conversion():
     message_conversion._to_primitive_inst = _to_primitive_inst
 
 def instantiate_message(message_type):
-    if isinstance(message_type, basestring):
+    if isinstance(message_type, str):
         msg_type = lookup_object(message_type)
     if not issubclass(msg_type, rospy.Message):
         raise TypeError("msg_type should be rospy.Message instance or its string reprensentation")
     return msg_type
 
 monkey_patch_message_conversion()
-extract_values = message_conversion.extract_values
-populate_instance = message_conversion.populate_instance
+
+extract_values = message_conversion.extract_values  # type: Callable[[rospy.Message], Dict]
+populate_instance = message_conversion.populate_instance  # type: Callable[[Dict, rospy.Message], rospy.Message]
+
 
 __all__ = ['lookup_object', 'instantiate_message', 'extract_values', 'populate_instance']
