@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-
 import inject
 import paho.mqtt.client as mqtt
 import rospy
@@ -11,9 +8,9 @@ from .util import lookup_object
 
 
 def create_config(mqtt_client, serializer, deserializer, mqtt_private_path):
-    if isinstance(serializer, basestring):
+    if isinstance(serializer, str):
         serializer = lookup_object(serializer)
-    if isinstance(deserializer, basestring):
+    if isinstance(deserializer, str):
         deserializer = lookup_object(deserializer)
     private_path_extractor = create_private_path_extractor(mqtt_private_path)
     def config(binder):
@@ -42,9 +39,8 @@ def mqtt_bridge_node():
     mqtt_client = mqtt_client_factory(mqtt_params)
 
     # load serializer and deserializer
-    serializer = params.get('serializer', 'json:dumps')
-    deserializer = params.get('deserializer', 'json:loads')
-    use_bytes = params.get('use_bytes', False)
+    serializer = params.get('serializer', 'msgpack:dumps')
+    deserializer = params.get('deserializer', 'msgpack:loads')
 
     # dependency injection
     config = create_config(
@@ -59,8 +55,6 @@ def mqtt_bridge_node():
     # configure bridges
     bridges = []
     for bridge_args in bridge_params:
-        if 'use_bytes' not in bridge_args:
-            bridge_args['use_bytes'] = use_bytes
         bridges.append(create_bridge(**bridge_args))
 
     # start MQTT loop
